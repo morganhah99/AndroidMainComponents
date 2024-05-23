@@ -26,11 +26,13 @@ class MainService : Service() {
     override fun onCreate() {
         super.onCreate()
         musicPlayer = MediaPlayer.create(this, R.raw.pink)
-        musicPlayer!!.isLooping = true
+        musicPlayer!!.setOnCompletionListener {
+            playNextSong()
+        }
     }
 
     private fun initializePlayer(songIndex: Int) {
-        musicPlayer?.release() // Release any previous MediaPlayer
+        musicPlayer?.release()
         musicPlayer = MediaPlayer.create(this, songList[songIndex])
         musicPlayer!!.isLooping = true
     }
