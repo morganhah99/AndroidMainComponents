@@ -24,10 +24,20 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.ContactsContract
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
 
     private val REQUEST_READ_CONTACTS: Int = 1231
+
+    val contacts = mutableListOf<Contact>()
+
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    ContactList()
                 }
             }
         }
@@ -57,6 +67,32 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ContactList() {
 
+        LazyColumn {
+            items(contacts) { contact ->
+                ContactCardView(contact = contact)
+            }
+
+        }
+
+    }
+
+    @Composable
+    fun ContactCardView(contact: Contact) {
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(text = "Contact ID: ${contact.contactID}")
+                Text(text = "Name: ${contact.name}")
+                Text(text = "Phone: ${contact.phoneNumber}")
+                Text(text = "Email: ${contact.email ?: "N/A"}")
+            }
+        }
     }
 
 
@@ -143,7 +179,6 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("Range")
     fun getContactList(context: Context): List<Contact> {
-        val contacts = mutableListOf<Contact>()
         val contentResolver = context.contentResolver
         val cursor = contentResolver.query(
             ContactsContract.Contacts.CONTENT_URI,
@@ -202,11 +237,4 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
