@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.getValue
@@ -70,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        PlayMusicButton()
+                        MusicControllerButtons()
                         ContactList()
                     }
                 }
@@ -117,7 +116,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun PlayMusicButton() {
+    fun MusicControllerButtons() {
         var isPlaying by remember { mutableStateOf(false) }
         val context = LocalContext.current
         val blackColor = Color(0xFF000000)
@@ -127,8 +126,13 @@ class MainActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(16.dp)
         ) {
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Previous")
+            IconButton(onClick = { /*TODO*/ }) {
+                Image(
+                    painter = painterResource(R.drawable.previous_song),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = blackColor),
+                    modifier = Modifier.size(48.dp)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = {
@@ -154,10 +158,15 @@ class MainActivity : ComponentActivity() {
 
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
+            IconButton(onClick = {
                 musicButtonHelper(context, MainService.ACTION_NEXT)
             }) {
-                Text(text = "Next")
+                Image(
+                    painter = painterResource(R.drawable.next_song),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = blackColor),
+                    modifier = Modifier.size(48.dp)
+                )
             }
         }
     }

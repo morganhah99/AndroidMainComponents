@@ -24,7 +24,7 @@ class MainService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        musicPlayer = MediaPlayer.create(this, R.raw.color_violet)
+        musicPlayer = MediaPlayer.create(this, R.raw.pink)
         musicPlayer!!.isLooping = true
     }
 
@@ -58,7 +58,10 @@ class MainService : Service() {
     }
 
     private fun playNextSong() {
-        currentSongIndex = (currentSongIndex + 1) % songList.size
+        currentSongIndex += 1
+        if (currentSongIndex >= songList.size) {
+            currentSongIndex = 0
+        }
         initializePlayer(currentSongIndex)
         musicPlayer!!.start()
     }
