@@ -26,6 +26,9 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".MainService" />
+
+
         <receiver
             android:name=".MainBroadcastReceiver"
             android:enabled="true"

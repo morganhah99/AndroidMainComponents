@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
     private val REQUEST_READ_CONTACTS: Int = 1231
 
-    val contacts = mutableListOf<Contact>()
+    private val contacts = mutableListOf<Contact>()
 
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
