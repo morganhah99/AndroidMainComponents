@@ -126,7 +126,9 @@ class MainActivity : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(16.dp)
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                musicButtonHelper(context, MainService.ACTION_PREVIOUS)
+            }) {
                 Image(
                     painter = painterResource(R.drawable.previous_song),
                     contentDescription = null,
@@ -179,6 +181,7 @@ class MainActivity : ComponentActivity() {
                         MainService.ACTION_PLAY -> MainService.ACTION_RESUME
                         MainService.ACTION_PAUSE -> MainService.ACTION_PAUSE
                         MainService.ACTION_NEXT -> MainService.ACTION_NEXT
+                        MainService.ACTION_PREVIOUS -> MainService.ACTION_PREVIOUS
                         else -> MainService.ACTION_PLAY
                     }
                 })
