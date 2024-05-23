@@ -43,18 +43,22 @@ class MainService : Service() {
                 Toast.makeText(this, "Music Service started by user.", Toast.LENGTH_SHORT).show()
                 musicPlayer!!.start()
             }
+
             ACTION_PAUSE -> {
                 Toast.makeText(this, "Music Service paused by user.", Toast.LENGTH_SHORT).show()
                 musicPlayer!!.pause()
             }
+
             ACTION_RESUME -> {
                 Toast.makeText(this, "Music Service resumed by user.", Toast.LENGTH_SHORT).show()
                 musicPlayer!!.start()
             }
+
             ACTION_NEXT -> {
                 Toast.makeText(this, "Playing Next song", Toast.LENGTH_SHORT).show()
                 playNextSong()
             }
+
             ACTION_PREVIOUS -> {
                 Toast.makeText(this, "Playing Previous song", Toast.LENGTH_SHORT).show()
                 playPreviousSong()
@@ -89,4 +93,6 @@ class MainService : Service() {
         musicPlayer!!.release()
         Toast.makeText(this, "Music Service destroyed by user.", Toast.LENGTH_SHORT).show()
     }
+
+
 }

@@ -16,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.androidmaincomponents.ui.theme.AndroidMainComponentsTheme
-import android.app.ActivityManager
-import android.content.Context
 import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +41,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.androidmaincomponents.utils.musicButtonHelper
 
 class MainActivity : ComponentActivity() {
 
@@ -170,37 +169,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun musicButtonHelper(context: Context, action: String) {
-        when {
-            isMyServiceRunning(MainService::class.java, context) -> {
-                context.startService(Intent(context, MainService::class.java).apply {
-                    this.action = when (action) {
-                        MainService.ACTION_PLAY -> MainService.ACTION_RESUME
-                        MainService.ACTION_PAUSE -> MainService.ACTION_PAUSE
-                        MainService.ACTION_NEXT -> MainService.ACTION_NEXT
-                        MainService.ACTION_PREVIOUS -> MainService.ACTION_PREVIOUS
-                        else -> MainService.ACTION_PLAY
-                    }
-                })
-            }
-            else -> {
-                context.startService(Intent(context, MainService::class.java).apply {
-                    this.action = MainService.ACTION_PLAY
-                })
-            }
-        }
 
-    }
 
-    private fun isMyServiceRunning(serviceClass: Class<*>, context: Context): Boolean {
-        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
-    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
