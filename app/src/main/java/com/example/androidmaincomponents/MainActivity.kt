@@ -25,18 +25,29 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
 import android.provider.ContactsContract
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -54,7 +65,11 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
                         PlayMusicButton()
                         ContactList()
                     }
@@ -75,7 +90,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun ContactList() {
-
         LazyColumn {
             items(contacts) { contact ->
                 ContactCardView(contact = contact)
@@ -105,38 +119,72 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun PlayMusicButton() {
         var isPlaying by remember { mutableStateOf(false) }
-        val buttonText = if (isPlaying) "Stop" else "Play"
+        val context = LocalContext.current
+        val blackColor = Color(0xFF000000)
 
-        Row {
-            Button(onClick = {
-                musicButtonHelper()
-                isPlaying = !isPlaying
-            }) {
-                Text(text = buttonText)
-            }
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
             Button(onClick = { /*TODO*/ }) {
                 Text(text = "Previous")
             }
-            Button(onClick = { /*TODO*/ }) {
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = {
+                musicButtonHelper(context, if (isPlaying) MainService.ACTION_PAUSE else MainService.ACTION_PLAY)
+                isPlaying = !isPlaying
+            }) {
+                if (isPlaying) {
+                    Image(
+                        painter = painterResource(R.drawable.pause_button),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = blackColor),
+                        modifier = Modifier.size(48.dp)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.play_arrow),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = blackColor),
+                        modifier = Modifier.size(48.dp)
+                    )
+
+                }
+
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                musicButtonHelper(context, MainService.ACTION_NEXT)
+            }) {
                 Text(text = "Next")
             }
-
-        }
-
-
-    }
-
-    private fun musicButtonHelper() {
-        if (isMyServiceRunning(MainService::class.java)) {
-            stopService(Intent(this@MainActivity, MainService::class.java))
-        } else {
-            startService(Intent(this@MainActivity, MainService::class.java))
         }
     }
 
+    private fun musicButtonHelper(context: Context, action: String) {
+        when {
+            isMyServiceRunning(MainService::class.java, context) -> {
+                context.startService(Intent(context, MainService::class.java).apply {
+                    this.action = when (action) {
+                        MainService.ACTION_PLAY -> MainService.ACTION_RESUME
+                        MainService.ACTION_PAUSE -> MainService.ACTION_PAUSE
+                        MainService.ACTION_NEXT -> MainService.ACTION_NEXT
+                        else -> MainService.ACTION_PLAY
+                    }
+                })
+            }
+            else -> {
+                context.startService(Intent(context, MainService::class.java).apply {
+                    this.action = MainService.ACTION_PLAY
+                })
+            }
+        }
 
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>, context: Context): Boolean {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
             if (serviceClass.name == service.service.className) {
                 return true
