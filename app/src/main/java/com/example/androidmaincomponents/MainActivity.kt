@@ -22,14 +22,21 @@ import com.example.androidmaincomponents.ui.theme.AndroidMainComponentsTheme
 import com.google.android.material.snackbar.Snackbar
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.Context
 import android.provider.ContactsContract
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -45,10 +52,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidMainComponentsTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    ContactList()
+                    Column {
+                        PlayMusicButton()
+                        ContactList()
+                    }
                 }
             }
         }
@@ -73,7 +82,6 @@ class MainActivity : ComponentActivity() {
             }
 
         }
-
     }
 
     @Composable
@@ -84,8 +92,7 @@ class MainActivity : ComponentActivity() {
                 .fillMaxWidth(),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(16.dp)
+                modifier = Modifier.padding(16.dp)
             ) {
                 Text(text = "Contact ID: ${contact.contactID}")
                 Text(text = "Name: ${contact.name}")
@@ -95,12 +102,53 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun PlayMusicButton() {
+        var isPlaying by remember { mutableStateOf(false) }
+        val buttonText = if (isPlaying) "Stop" else "Play"
+
+        Row {
+            Button(onClick = {
+                musicButtonHelper()
+                isPlaying = !isPlaying
+            }) {
+                Text(text = buttonText)
+            }
+            Button(onClick = { /*TODO*/ }) {
+                Text(text = "Previous")
+            }
+            Button(onClick = { /*TODO*/ }) {
+                Text(text = "Next")
+            }
+
+        }
+
+
+    }
+
+    private fun musicButtonHelper() {
+        if (isMyServiceRunning(MainService::class.java)) {
+            stopService(Intent(this@MainActivity, MainService::class.java))
+        } else {
+            startService(Intent(this@MainActivity, MainService::class.java))
+        }
+    }
+
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
 
 
     private fun loadContacts() {
         if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_CONTACTS
+                this, Manifest.permission.READ_CONTACTS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             val contacts = getContactList(this)
@@ -115,8 +163,7 @@ class MainActivity : ComponentActivity() {
     private fun requestContactsPermission() {
         // Check if the permission has already been granted
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_CONTACTS
+                this, Manifest.permission.READ_CONTACTS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             // Permission has already been granted, do something with the contact list
@@ -127,8 +174,7 @@ class MainActivity : ComponentActivity() {
         } else {
             // Permission has not been granted, request it
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this,
-                    Manifest.permission.READ_CONTACTS
+                    this, Manifest.permission.READ_CONTACTS
                 )
             ) {
                 // Explain why the app needs the permission
@@ -140,26 +186,20 @@ class MainActivity : ComponentActivity() {
                 ).setAction("OK") {
                     // Request the permission
                     ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.READ_CONTACTS),
-                        REQUEST_READ_CONTACTS
+                        this, arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS
                     )
                 }.show()
             } else {
                 // Request the permission
                 ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_CONTACTS),
-                    REQUEST_READ_CONTACTS
+                    this, arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS
                 )
             }
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_READ_CONTACTS && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -175,14 +215,11 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
-
     @SuppressLint("Range")
     fun getContactList(context: Context): List<Contact> {
         val contentResolver = context.contentResolver
         val cursor = contentResolver.query(
-            ContactsContract.Contacts.CONTENT_URI,
-            null, null, null, null
+            ContactsContract.Contacts.CONTENT_URI, null, null, null, null
         )
         cursor?.use {
             while (it.moveToNext()) {
@@ -203,11 +240,13 @@ class MainActivity : ComponentActivity() {
                         ContactsContract.CommonDataKinds.Email.CONTENT_URI,
                         null,
                         ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
-                        arrayOf(id), null
+                        arrayOf(id),
+                        null
                     )
                     emailCursor?.use { ec ->
                         if (ec.moveToNext()) {
-                            email = ec.getString(ec.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS))
+                            email =
+                                ec.getString(ec.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS))
                         }
                     }
                     phoneCursor?.use { pc ->
@@ -231,8 +270,9 @@ class MainActivity : ComponentActivity() {
         return contacts
     }
 
-    data class Contact(val name: String, val phoneNumber: String?, val contactID: String?, val email: String?)
-
+    data class Contact(
+        val name: String, val phoneNumber: String?, val contactID: String?, val email: String?
+    )
 
 
 }
