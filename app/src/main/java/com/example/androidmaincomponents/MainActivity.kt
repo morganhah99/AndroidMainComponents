@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AndroidMainComponentsTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -53,9 +52,14 @@ class MainActivity : ComponentActivity() {
         sendBroadcast(intent)
 
         loadContacts()
+    }
 
+    @Composable
+    fun ContactList() {
 
     }
+
+
 
     private fun loadContacts() {
         if (ActivityCompat.checkSelfPermission(
@@ -135,6 +139,8 @@ class MainActivity : ComponentActivity() {
     }
 
 
+
+
     @SuppressLint("Range")
     fun getContactList(context: Context): List<Contact> {
         val contacts = mutableListOf<Contact>()
@@ -157,17 +163,31 @@ class MainActivity : ComponentActivity() {
                         arrayOf(id),
                         null
                     )
+                    var email: String? = null
+                    val emailCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        null,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                        arrayOf(id), null
+                    )
+                    emailCursor?.use { ec ->
+                        if (ec.moveToNext()) {
+                            email = ec.getString(ec.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS))
+                        }
+                    }
                     phoneCursor?.use { pc ->
                         while (pc.moveToNext()) {
                             val phoneNumber =
                                 pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                            val contact = Contact(name, phoneNumber)
+                            val contactID =
+                                pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID))
+                            val contact = Contact(name, phoneNumber, contactID, email)
                             contacts.add(contact)
                         }
                     }
                     phoneCursor?.close()
                 } else {
-                    val contact = Contact(name, null)
+                    val contact = Contact(name, null, null, null)
                     contacts.add(contact)
                 }
             }
@@ -176,7 +196,7 @@ class MainActivity : ComponentActivity() {
         return contacts
     }
 
-    data class Contact(val name: String, val phoneNumber: String?)
+    data class Contact(val name: String, val phoneNumber: String?, val contactID: String?, val email: String?)
 
 
 
