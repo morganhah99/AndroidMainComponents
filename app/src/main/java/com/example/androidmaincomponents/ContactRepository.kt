@@ -42,6 +42,8 @@ class ContactRepository(private val context: Context) {
     }
 
 
+
+
     private fun requestContactsPermission(activity: MainActivity, rootView: View) {
         if (ContextCompat.checkSelfPermission(
                 context, Manifest.permission.READ_CONTACTS
